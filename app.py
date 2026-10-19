@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 import os
-import cetifi
+import certifi
 import pytds
 
 app = Flask(__name__)
