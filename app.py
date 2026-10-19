@@ -16,7 +16,7 @@ produck_lock = threading.Lock()
        # 'TrustServerCertificate=yes'
    # )
 
-def getConection():
+def getConnection():
     return pytds.connect(
         server=os.environ["DB_SERVER"],
         database=os.environ['DB_NAME'],
