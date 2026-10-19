@@ -19,7 +19,7 @@ produck_lock = threading.Lock()
 def getConnection():
     return pytds.connect(
         server=os.environ["DB_SERVER"],
-        database=os.environ['DB_NAME'],
+        database=os.environ['DB_DATABASE'],
         user=os.environ['DB_USER'],
         password=os.environ['DB_PASSWORD'],
         port=1433,
