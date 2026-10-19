@@ -1,24 +1,22 @@
 from flask import Flask, jsonify, request
-import pyodbc
-import time
-import threading
+import os
 import cetifi
 import pytds
 
 app = Flask(__name__)
 produck_lock = threading.Lock()
 
-def getConnection():
-    return pyodbc.connect(
-        "DRIVER={ODBC Driver 17 for SQL Server};"
-        "SERVER=ad-2026-henry.database.windows.net;"
-        "DATABASE=AppDistribuidas_2026_DB;"
-        "UID=henry;" 
-        "PWD=@Hdlf6116;"
-        'TrustServerCertificate=yes'
-    )
+#def getConnection():
+ #   return pyodbc.connect(
+  #      "DRIVER={ODBC Driver 17 for SQL Server};"
+   #     "SERVER=ad-2026-henry.database.windows.net;"
+    #    "DATABASE=AppDistribuidas_2026_DB;"
+     #   "UID=henry;" 
+      #  "PWD=@Hdlf6116;"
+       # 'TrustServerCertificate=yes'
+   # )
 
-def getConeccion():
+def getConection():
     return pytds.connect(
         server=os.environ["DB_SERVER"],
         database=os.environ['DB_NAME'],
