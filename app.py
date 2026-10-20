@@ -5,6 +5,8 @@ import os
 import certifi
 import pytds
 
+import requests, hmac
+
 app = Flask(__name__)
 produck_lock = threading.Lock()
 
@@ -238,6 +240,54 @@ def update_version():
             "error": "error al actualizar producto con version",
             "msg": str(e)
         }), 500
+
+def enviar_correo(proceso, detalle):
+    url = 'https://api.mailjet.com/v3.1/send'
+    auth = (os.getenv('MAILJET_API_KEY'), os.getenv('MAILJET_SECRET_KEY'))
+    data = {
+        'Messages': [{
+            'From': {'Email': os.getenv('EMAIL_REMITENTE'), 'Name': 'API ad_2026'},
+            'To': [{'Email': os.getenv('EMAIL_DESTINO')}],
+            'Subject': f'[{proceso}]',
+            'TextPart': detalle
+        }]
+    }
+    r = requests.post(url, auth=auth, json=data, timeout=15)
+    print('Mailjet:', r.status_code, r.text)   # se ve en los Logs de Render
+    return r.status_code == 200
+
+
+
+@app.route('/api/procesar', methods=['POST'])
+def procesar():
+    api_key = request.headers.get('X-API-Key', '')
+    if not hmac.compare_digest(api_key, os.getenv('PROCESS_API_KEY', '')):
+        return jsonify({'error': 'API Key no válida'}), 401
+
+    conn = getConnection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, names, price, stock FROM dbo.products_vw')
+    rows = cursor.fetchall()
+    conn.close()
+
+    total = len(rows)
+    unidades = sum(int(r[3]) for r in rows)
+    lineas = [f'- {r[1]} | Precio: ${r[2]} | Stock: {r[3]}' for r in rows]
+    detalle = (
+        f'Se procesaron {total} productos.\n'
+        f'Unidades totales en stock: {unidades}\n\n'
+        'Detalle:\n' + '\n'.join(lineas)
+    )
+
+    enviado = enviar_correo('Consulta de productos', detalle)
+
+    return jsonify({
+        'procesamiento': 'finalizado',
+        'total_productos': total,
+        'notificacion': 'enviado' if enviado else 'error'
+    })
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
