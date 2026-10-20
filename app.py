@@ -27,7 +27,7 @@ def getConnection():
         port=1433,
         cafile=certifi.where(),
         validate_host=True,
-        row_strategy=pytds.rows.namedtuple_row_strategy 
+        row_strategy=pytds.namedtuple_row_strategy 
     )
 
 
