@@ -26,7 +26,8 @@ def getConnection():
         password=os.environ['DB_PASSWORD'],
         port=1433,
         cafile=certifi.where(),
-        validate_host=True
+        validate_host=True,
+        row_strategy=pytds.rows.namedtuple_row_strategy
     )
 
 
